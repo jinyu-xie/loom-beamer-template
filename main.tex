@@ -1,0 +1,310 @@
+% !TeX program = latexmk
+% Run from this directory: latexmk main.tex
+% The .latexmkrc selects XeLaTeX and writes outputs to build/.
+% Keep prose paragraphs on one source line and enable editor word wrapping.
+\documentclass[aspectratio=169,11pt,t,compress]{beamer}
+\usetheme{Loom}
+\usepackage{listings}
+
+% The notes wrapper sets this switch before reading the shared content.
+\providecommand{\loomnotesmode}{0}
+\ifnum\loomnotesmode=1
+  \usepackage{loomnotes}
+\fi
+
+\title[Loom guide]{How to use this\\Beamer template}
+\subtitle{A guide to Loom}
+\author{Your Name}
+\institute{Your Organization}
+\date{Template guide}
+\loomtagline{Design inspired by \href{https://github.com/Polaris-Aeterna/loom-notes}{Loom} by Polaris.}
+% Optional branding, supplied by you:
+% \setloomlogofile{assets/your-logo.pdf}
+% Alternative cover:
+% \setbeamertemplate{title page}[loom centered]
+
+% This listing style belongs to the tutorial, not to the reusable theme.
+\lstset{
+  language=[LaTeX]TeX,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{loomIndigo},
+  commentstyle=\color{loomSelvage},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  upquote=true,
+  aboveskip=.2cm,
+  belowskip=.2cm
+}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+  \note{This guide shows how to build a talk with this Beamer template. Its visual design draws on the original \href{https://github.com/Polaris-Aeterna/loom-notes}{Loom project} by Polaris. The source contains the same examples you see on the slides, and a separate starter file gives you a shorter starting point.}
+\end{frame}
+
+\begin{frame}{Contents}
+  \vspace{.35cm}
+  \tableofcontents[hideallsubsections]
+  \note{First we'll compile the template. Then we'll look at common slide elements, speaker notes, and a few ways to customize the appearance.}
+\end{frame}
+
+\setloomsectionnote{Start with a working build before changing the content. That makes missing dependencies easier to identify.}
+\section[Setup]{Getting started}
+
+\begin{frame}{Project files}
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabular}{@{}p{.36\textwidth}p{.59\textwidth}@{}}
+    \toprule
+    \loomkeyterm{File} & \loomkeyterm{Purpose} \\
+    \midrule
+    \texttt{starter.tex} & A short presentation to copy and edit \\
+    \texttt{main.tex} & This tutorial, including speaker notes \\
+    \texttt{beamerthemeLoom.sty} & Colors, typography, and slide layouts \\
+    \texttt{loomnotes.sty} & Notes on the right, with aligned hyperlinks \\
+    \texttt{main-notes.tex} & Builds the tutorial with speaker notes \\
+    \texttt{main-handout.tex} & Builds one page per frame \\
+    \bottomrule
+  \end{tabular}
+  \note{Keep the theme beside your presentation source. Edit starter.tex for a new talk, or use main.tex if you want the complete set of examples. The wrappers reuse the same content, so you don't need to maintain separate slide and notes versions.}
+\end{frame}
+
+\begin{frame}[fragile]{The first build}
+  Use a TeX distribution with XeLaTeX and \texttt{latexmk}.
+
+  \vspace{.24cm}
+  From the template directory:
+  \begin{lstlisting}[language={}]
+latexmk main.tex
+latexmk main-notes.tex
+  \end{lstlisting}
+
+  \vspace{.20cm}
+  \loomkeyterm{Audience}\quad \texttt{build/main.pdf}\par
+  \vspace{.12cm}
+  \loomkeyterm{Presenter}\quad \texttt{build/main-notes.pdf}
+
+  \vspace{.30cm}
+  \texttt{latexmk} repeats compilation until navigation and page counts settle.
+  \note{Run these commands inside the template folder. The included latexmk configuration selects XeLaTeX and keeps generated files in build. The first PDF contains slides only. The second places the speaker notes beside each slide.}
+\end{frame}
+
+\begin{frame}[fragile]{Presentation metadata}
+  Change these fields in the preamble:
+  \begin{lstlisting}
+\title[Short title]{Your presentation title}
+\subtitle{Your subtitle}
+\author{Your Name}
+\institute{Your Organization}
+\date{\today}
+  \end{lstlisting}
+
+  \vspace{.30cm}
+  \loomkeyterm{Short title}\quad Appears in the footer.\par
+  \vspace{.14cm}
+  \loomkeyterm{Cover}\quad Use \verb|[plain,noframenumbering]| on its frame.
+  \note{The long title appears on the cover, while the optional short title appears in the footer. The cover has no header or footer and does not contribute to the numbered frame count. Next, we'll add the slides themselves.}
+\end{frame}
+
+\setloomsectionnote{The theme uses standard Beamer environments. Most slide content will work without a custom command.}
+\section[Content]{Writing slides}
+\subsection[Frames]{Frames and navigation}
+
+\begin{frame}{A basic frame}
+  % Keep this range in sync with the marked example in starter.tex.
+  \lstinputlisting[firstline=28,lastline=35,basicstyle=\ttfamily\footnotesize]{starter.tex}
+
+  \vspace{.25cm}
+  Each \texttt{frame} is one numbered slide. Its overlays can occupy several PDF pages.
+  \note{This is the complete frame from starter.tex. Give it a title, add the visible content, and put your spoken explanation in note. Keep one main point per frame. We'll introduce overlays separately.}
+\end{frame}
+
+\begin{frame}[fragile]{Sections and navigation}
+  \begin{lstlisting}
+\section[Methods]{Methods and assumptions}
+\subsection[Model]{Model and objective}
+  \end{lstlisting}
+
+  \vspace{.20cm}
+  \begin{itemize}
+    \item Section names populate the contents and top navigation.
+    \item The short subsection name appears in the footer.
+    \item Each dot links to a frame. Overlays keep the same frame number.
+  \end{itemize}
+
+  \vspace{.18cm}
+  A section divider appears automatically. Use \texttt{nosectionpages} to disable it.
+  \note{Short names keep the navigation readable. Sections organize the talk, while subsections give a more specific footer label. The default theme inserts a counted divider for each section. Recompile after changing the structure so the links and total count update.}
+\end{frame}
+
+\subsection[Layout]{Layout and mathematics}
+
+\begin{frame}[fragile]{Columns and tables}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \loomkeyterm{Two-column layout}
+      \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{.47\textwidth}
+    Left content
+  \end{column}
+  \begin{column}{.47\textwidth}
+    Right content
+  \end{column}
+\end{columns}
+      \end{lstlisting}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \loomkeyterm{Table example}\par
+      \vspace{.26cm}
+      \renewcommand{\arraystretch}{1.4}
+      \begin{tabular}{@{}ll@{}}
+        \toprule
+        Element & Command \\
+        \midrule
+        Top rule & \texttt{\string\toprule} \\
+        Header rule & \texttt{\string\midrule} \\
+        Bottom rule & \texttt{\string\bottomrule} \\
+        \bottomrule
+      \end{tabular}
+      \vspace{.26cm}
+      \par The theme loads \texttt{booktabs}. Keep column widths below the available space.
+    \end{column}
+  \end{columns}
+  \note{Use columns when two pieces of content need to be read together. Here the left side shows the layout code and the right side demonstrates a table. The top-alignment option keeps both columns on the same baseline.}
+\end{frame}
+
+\begin{frame}[fragile]{Mathematics and theorem blocks}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \loomkeyterm{Source}
+      \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+\begin{theorem}[Nonnegative norm]
+  For every $x\in\mathbb{R}^d$,
+  \[
+    \|x\|_2^2=x^\top x\geq 0.
+  \]
+\end{theorem}
+      \end{lstlisting}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \begin{theorem}[Nonnegative norm]
+        For every $x\in\mathbb{R}^d$,
+        \[
+          \|x\|_2^2=x^\top x\geq 0.
+        \]
+      \end{theorem}
+    \end{column}
+  \end{columns}
+
+  \vspace{.30cm}
+  Standard \texttt{definition}, \texttt{example}, and \texttt{proof} environments also work.
+  \note{You can use ordinary LaTeX mathematics. The theme styles Beamer's theorem environments and supplies their numbering. This simple statement is only a formatting example. Use a separate frame if a real theorem needs more room.}
+\end{frame}
+
+\begin{frame}{Emphasis and blocks}
+  \loomkeyterm{Light emphasis}\quad Use \texttt{\string\loomkeyterm} for a short label.
+  \begin{block}{A result}
+    Use a standard \texttt{block} for a statement that needs visual emphasis.
+  \end{block}
+  \begin{alertblock}{A limitation}
+    Use \texttt{alertblock} for a condition or warning.
+  \end{alertblock}
+  \begin{exampleblock}{An example}
+    Use \texttt{exampleblock} for a short illustration.
+  \end{exampleblock}
+  \note{These are the three standard block styles. Most slides need only one of them, or just a bold label. Keep the visible text brief and use the notes for the explanation.}
+\end{frame}
+
+\setloomsectionnote{The audience and notes files share one source. Overlays are optional, and a handout build removes the incremental steps.}
+\section[Present]{Notes and presentation}
+
+\begin{frame}[fragile]{Speaker notes}
+  Put the spoken explanation inside the corresponding frame:
+  \begin{lstlisting}
+\note{Explain the main point in a few sentences.
+Then connect it to the next slide.}
+  \end{lstlisting}
+
+  \vspace{.18cm}
+  \loomkeyterm{Build}\quad \texttt{latexmk main-notes.tex}\par
+  \vspace{.18cm}
+  The notes PDF places the slide on the left and notes on the right.
+
+  \vspace{.22cm}
+  Use a presenter application that supports split-page PDFs. Share only the audience half.
+  \note{The note stays with its slide in main.tex. The notes wrapper loads loomnotes, which positions the two pages without shifting the clickable navigation regions. In a presenter application, check that the audience display shows only the slide before you start.}
+\end{frame}
+
+\begin{frame}{Optional reveals}
+  These two blocks demonstrate a cumulative overlay:
+  \begin{loomstepblock}<1->{First point}
+    \texttt{\string\begin\{loomstepblock\}<1->\{First point\}}
+  \end{loomstepblock}
+  \begin{loomstepalert}<2->{Second point}
+    \texttt{\string\begin\{loomstepalert\}<2->\{Second point\}}
+  \end{loomstepalert}
+  \vspace{.28cm}
+  Omit overlay specifications to show all content together.
+  \note{The first block appears immediately. One advance reveals the second while keeping the first in place. Both PDF pages have the same frame number. Use reveals only when the order helps the explanation.}
+\end{frame}
+
+\begin{frame}[fragile]{Audience, notes, and handouts}
+  \begin{lstlisting}[language={}]
+latexmk main.tex
+latexmk main-notes.tex
+latexmk main-handout.tex
+  \end{lstlisting}
+
+  \vspace{.10cm}
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabular}{@{}p{.38\textwidth}p{.57\textwidth}@{}}
+    \toprule
+    \loomkeyterm{Output file} & \loomkeyterm{Use} \\
+    \midrule
+    \texttt{main.pdf} & Audience slides, including reveals \\
+    \texttt{main-notes.pdf} & Slides with speaker notes on the right \\
+    \texttt{main-handout.pdf} & One page per frame, without notes \\
+    \bottomrule
+  \end{tabular}
+  \note{Choose the audience file for a normal PDF presentation and the notes file for a compatible presenter application. Share the handout when readers need the complete content without repeated reveal pages. The wrappers all read main.tex.}
+\end{frame}
+
+\setloomsectionnote{You can change metadata and branding without editing the theme. Keep appearance changes in the preamble when possible.}
+\section[Customize]{Customizing the template}
+
+\begin{frame}[fragile]{Logo, color, and typography}
+  The template has no institutional logo by default.
+  \begin{lstlisting}
+% Use artwork you have permission to share.
+\setloomlogofile{assets/your-logo.pdf}
+% Or hide the cover graphic:
+\setloomtitlegraphic{}
+
+% Local appearance overrides, after \usetheme{Loom}:
+\setbeamercolor{structure}{fg=loomMadder}
+\setbeamerfont{frametitle}{size=\Large}
+  \end{lstlisting}
+  \vspace{.16cm}
+  XeLaTeX uses Libertinus when available, with TeX font fallbacks.
+  \note{The logo is optional. Supply your own artwork and check its reuse permissions before publishing it. For small style changes, place overrides after the theme rather than editing the style file. The README lists the available fonts and fallback behavior.}
+\end{frame}
+
+\begin{frame}{Before you present}
+  \begin{enumerate}
+    \item Compile the audience and notes versions.
+    \item Check every slide for clipped text and crowded equations.
+    \item Test the section links and incremental reveals.
+    \item Confirm that the audience cannot see your notes.
+  \end{enumerate}
+
+  \vspace{.42cm}
+  \loomkeyterm{For a new talk}\quad Copy \texttt{starter.tex}.\par
+  \vspace{.16cm}
+  \loomkeyterm{For more options}\quad See \texttt{README.md}.
+  \note{That covers the basic workflow. Start from the short example, add your own content, and inspect both PDFs before presenting. The README documents the theme options and build commands in more detail.}
+\end{frame}
+
+\end{document}

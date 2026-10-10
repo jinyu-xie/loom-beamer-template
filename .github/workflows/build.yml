@@ -1,0 +1,50 @@
+name: Build example PDFs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  latex:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install TeX dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            latexmk lmodern texlive-xetex texlive-luatex \
+            texlive-latex-extra texlive-pictures \
+            texlive-fonts-recommended texlive-fonts-extra
+
+      - name: Build XeLaTeX editions
+        run: |
+          latexmk main.tex
+          latexmk main-notes.tex
+          latexmk main-handout.tex
+          latexmk starter.tex
+
+      - name: Check alternative engines
+        run: |
+          latexmk -pdf -outdir=build-pdftex main.tex
+          latexmk -lualatex -outdir=build-luatex main.tex
+
+      - name: Upload compiled PDFs
+        uses: actions/upload-artifact@v7
+        with:
+          name: loom-example-pdfs
+          path: |
+            build/*.pdf
+            build-pdftex/*.pdf
+            build-luatex/*.pdf
+          if-no-files-found: error
+          retention-days: 14

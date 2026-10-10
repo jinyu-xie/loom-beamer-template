@@ -1,0 +1,603 @@
+%% beamerthemeLoom.sty
+%% A Loom-inspired Beamer theme for research reading groups.
+%%
+%% Visual motifs and the natural-dye palette are adapted from Loom
+%% by Polaris (https://github.com/Polaris-Aeterna/loom-notes), MIT licensed.
+%% This is an independent Beamer adaptation. See LICENSE for upstream credit.
+%% Navigation uses Beamer's native miniframes outer theme.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeLoom}[2026/10/10 v1.3 Loom presentation theme]
+
+\mode<presentation>
+
+% ---------------------------------------------------------------------------
+% Options
+% ---------------------------------------------------------------------------
+\newif\ifloom@sectionpages
+\newif\ifloom@wovensectionpages
+\loom@sectionpagestrue
+\loom@wovensectionpagesfalse
+\DeclareOptionBeamer{nosectionpages}{\loom@sectionpagesfalse}
+\DeclareOptionBeamer{wovensectionpages}{\loom@wovensectionpagestrue}
+\ProcessOptionsBeamer
+
+% ---------------------------------------------------------------------------
+% Packages and fonts
+% ---------------------------------------------------------------------------
+\RequirePackage{iftex}
+\RequirePackage{amsmath}
+\RequirePackage{mathtools}
+\RequirePackage{booktabs}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{etoolbox}
+\RequirePackage{ragged2e}
+\usetikzlibrary{calc,positioning,arrows.meta}
+
+\usefonttheme{professionalfonts}
+\ifPDFTeX
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage{lmodern}
+  \usefonttheme[onlymath]{serif}
+\else
+  \RequirePackage{fontspec}
+  \RequirePackage{unicode-math}
+  \IfFontExistsTF{Libertinus Serif}
+    {\setmainfont{Libertinus Serif}[Ligatures=TeX]}
+    {\setmainfont{TeX Gyre Pagella}[Ligatures=TeX]}
+  \IfFontExistsTF{Libertinus Sans}
+    {\setsansfont{Libertinus Sans}[Ligatures=TeX]}
+    {\setsansfont{TeX Gyre Heros}[Ligatures=TeX]}
+  \IfFontExistsTF{Libertinus Mono}
+    {\setmonofont{Libertinus Mono}}
+    {\setmonofont{Latin Modern Mono}}
+  % Research-paper mathematics with native bold and calligraphic alphabets.
+  % Body text remains Libertinus Sans.
+  \IfFontExistsTF{NewComputerModernMath}
+    {\setmathfont{NewComputerModernMath}[
+       BoldFont={NewComputerModernMath-Bold}]}
+    {\IfFontExistsTF{XITS Math}
+       {\setmathfont{XITS Math}[BoldFont={XITS Math Bold}]}
+       {\setmathfont{TeX Gyre Termes Math}}}
+\fi
+
+% ---------------------------------------------------------------------------
+% Loom's natural-dye palette
+% ---------------------------------------------------------------------------
+\definecolor{loomInk}{HTML}{211C17}       % warm iron-gall near-black
+\definecolor{loomIndigo}{HTML}{27406B}    % structure and results
+\definecolor{loomMadder}{HTML}{9C2B2E}    % definitions and emphasis
+\definecolor{loomWeld}{HTML}{BE8A20}      % examples and highlights
+\definecolor{loomLinen}{HTML}{F5EFE2}     % soft cloth fill
+\definecolor{loomThread}{HTML}{C7BBA1}    % quiet rules
+\definecolor{loomSelvage}{HTML}{8A7F6B}   % secondary text
+\definecolor{loomPaper}{HTML}{FCFAF6}     % projector-friendly warm paper
+
+\setbeamercolor{normal text}{fg=loomInk,bg=loomPaper}
+\setbeamercolor{structure}{fg=loomIndigo}
+\setbeamercolor{alerted text}{fg=loomMadder}
+\setbeamercolor{example text}{fg=loomWeld!72!loomInk}
+\setbeamercolor{title}{fg=loomIndigo}
+\setbeamercolor{subtitle}{fg=loomInk!84!loomPaper}
+\setbeamercolor{author}{fg=loomInk}
+\setbeamercolor{institute}{fg=loomSelvage}
+\setbeamercolor{date}{fg=loomSelvage}
+\setbeamercolor{frametitle}{fg=loomIndigo,bg=loomPaper}
+\setbeamercolor{section title}{fg=loomIndigo}
+
+% ---------------------------------------------------------------------------
+% Typography
+% ---------------------------------------------------------------------------
+\setbeamerfont{normal text}{family=\sffamily,size=\normalsize}
+\setbeamerfont{title}{family=\sffamily,series=\bfseries,size=\fontsize{30}{34}}
+\setbeamerfont{subtitle}{family=\sffamily,size=\large}
+\setbeamerfont{author}{family=\sffamily,series=\bfseries,size=\normalsize}
+\setbeamerfont{institute}{family=\sffamily,size=\small}
+\setbeamerfont{date}{family=\sffamily,size=\small}
+\setbeamerfont{frametitle}{family=\sffamily,series=\bfseries,size=\large}
+\setbeamerfont{framesubtitle}{family=\sffamily,series=\mdseries,size=\small}
+\setbeamerfont{section title}{family=\sffamily,series=\bfseries,size=\fontsize{24}{28}}
+\setbeamerfont{section number projected}{family=\sffamily,series=\bfseries,size=\small}
+\setbeamerfont{block title}{family=\sffamily,series=\bfseries,size=\normalsize}
+\setbeamerfont{block body}{family=\sffamily,size=\normalsize}
+\setbeamerfont{footline}{family=\sffamily,size=\scriptsize}
+\setbeamerfont{section in head/foot}{family=\sffamily,series=\bfseries,size=\scriptsize}
+\setbeamerfont{section in toc}{family=\sffamily,series=\bfseries,size=\large}
+\setbeamerfont{loom source}{family=\sffamily,size=\fontsize{7.3}{8.0}}
+\setbeamercolor{loom source}{fg=loomSelvage!92!loomPaper}
+
+\setbeamersize{text margin left=.62cm,text margin right=.55cm}
+\setlength{\abovedisplayskip}{.55em}
+\setlength{\belowdisplayskip}{.55em}
+
+% ---------------------------------------------------------------------------
+% Institutional logo and woven primitives
+% ---------------------------------------------------------------------------
+% Institutional artwork is opt-in and is not distributed with the release.
+\newcommand{\loomlogofile}{}
+\newcommand{\setloomlogofile}[1]{\renewcommand{\loomlogofile}{#1}}
+\newcommand{\LoomLogo}[1]{%
+  \ifdefempty{\loomlogofile}{}{%
+    \IfFileExists{\loomlogofile}
+      {\includegraphics[width=#1,keepaspectratio]{\loomlogofile}}
+      {\PackageWarning{beamerthemeLoom}{Logo file '\loomlogofile' not found; omitting logo}}%
+  }%
+}
+
+\newcommand{\LoomTile}[1][loomIndigo]{%
+  \begin{tikzpicture}[x=1pt,y=1pt,baseline=-.45pt]
+    \fill[#1] (0,0) rectangle (3,3);
+    \fill[#1] (3,3) rectangle (6,6);
+    \fill[#1!28!loomLinen] (3,0) rectangle (6,3);
+    \fill[#1!28!loomLinen] (0,3) rectangle (3,6);
+  \end{tikzpicture}%
+}
+
+% Stable two-digit labels without producing 010, 011, ... for later sections.
+\newcommand{\loomtwodigits}[1]{\ifnum#1<10 0\fi\number#1\relax}
+
+% ---------------------------------------------------------------------------
+% Background: projector-friendly warm paper without a side rail
+% ---------------------------------------------------------------------------
+\setbeamertemplate{background canvas}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[loomPaper] (current page.south west) rectangle (current page.north east);
+  \end{tikzpicture}%
+}
+
+% ---------------------------------------------------------------------------
+% Headline navigation: section names plus circular mini-frame progress
+% ---------------------------------------------------------------------------
+\useoutertheme[subsection=false]{miniframes}
+\setbeamertemplate{mini frames}[default]
+\setbeamercolor{headline}{fg=loomInk,bg=white}
+\setbeamercolor{section in head/foot}{fg=loomInk,bg=white}
+\setbeamercolor{section in head/foot shaded}{fg=loomSelvage,bg=white}
+\setbeamercolor{mini frame}{fg=loomInk,bg=white}
+\setbeamercolor{upper separation line head}{bg=loomThread!72!white}
+\setbeamercolor{lower separation line head}{bg=loomThread!72!white}
+
+% The stock miniframes headline places XeTeX link annotations a fraction of a
+% point above the media box. A hairline top inset keeps every link inside it.
+\setbeamertemplate{headline}{%
+  \vskip.6pt
+  \begin{beamercolorbox}[colsep=1.5pt]{upper separation line head}\end{beamercolorbox}%
+  \begin{beamercolorbox}{section in head/foot}
+    \vskip2.5ex
+    \vskip-\baselineskip
+    \insertnavigation{\paperwidth}%
+    \vskip1.125ex
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[colsep=1.5pt]{lower separation line head}\end{beamercolorbox}%
+}
+
+% ---------------------------------------------------------------------------
+% Frame title: woven knot, indigo heading, madder binding thread
+% ---------------------------------------------------------------------------
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.25ex,dp=.95ex,leftskip=.59cm,rightskip=.5cm]{frametitle}
+    \raisebox{.1ex}{\LoomTile[loomIndigo]}\hspace{.48em}%
+    \insertframetitle
+    \ifx\insertframesubtitle\@empty\else
+      \hspace{.7em}{\usebeamerfont{framesubtitle}\color{loomSelvage}\insertframesubtitle}%
+    \fi
+  \end{beamercolorbox}%
+  \nointerlineskip
+  \makebox[\textwidth][l]{\hspace*{.61cm}\color{loomMadder}%
+    \rule{\dimexpr\textwidth-.61cm\relax}{.7pt}}%
+}
+
+% ---------------------------------------------------------------------------
+% Footer: current numbered frame / total numbered frames
+% ---------------------------------------------------------------------------
+\setbeamercolor{footline}{fg=loomSelvage,bg=loomLinen!58!loomPaper}
+\setbeamercolor{footline rule}{bg=loomThread}
+\setbeamertemplate{footline}{%
+  \ifbeamer@plainframe\else
+    \begin{beamercolorbox}[wd=\paperwidth,ht=.25pt]{footline rule}\end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.55ex,dp=1.05ex,leftskip=.58cm,rightskip=.55cm]{footline}
+      \usebeamerfont{footline}%
+      \color{loomInk!76!loomPaper}\insertshorttitle
+      \hfill
+      \ifdefempty{\insertsubsectionhead}
+        {\ifdefempty{\insertsectionhead}
+          {\color{loomSelvage}Overview}
+          {\color{loomSelvage}\insertsectionhead}}
+        {\color{loomSelvage}\insertsubsectionhead}
+      \hfill
+      \color{loomIndigo}\insertframenumber\,/\,\inserttotalframenumber
+    \end{beamercolorbox}%
+  \fi
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+% ---------------------------------------------------------------------------
+% Title page and section page
+% ---------------------------------------------------------------------------
+\newcommand{\insertloomtagline}{}
+\newcommand{\loomtagline}[1]{\gdef\insertloomtagline{#1}}
+\newcommand{\loomtitlegraphic}{\LoomLogo{2.25cm}}
+\newcommand{\setloomtitlegraphic}[1]{\renewcommand{\loomtitlegraphic}{#1}}
+
+\defbeamertemplate{title page}{loom centered}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north east,inner sep=0pt]
+      at ([xshift=-.50cm,yshift=-.38cm]current page.north east)
+      {\loomtitlegraphic};
+  \end{tikzpicture}%
+  \vspace*{.88cm}
+  \begin{minipage}{\textwidth}
+    \centering
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+    \vspace{.25cm}
+    {\color{loomMadder}\rule{5.2cm}{1.05pt}\par}
+    \ifx\insertsubtitle\@empty\else
+      \vspace{.27cm}
+      {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+    \fi
+  \end{minipage}
+  \vfill
+  \centering
+  \begin{minipage}{.78\textwidth}
+    \centering
+    \ifdefempty{\insertauthor}{}{%
+      {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+      \vspace{.18cm}}
+    \ifdefempty{\insertinstitute}{}{%
+      {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+      \vspace{.09cm}}
+    \ifdefempty{\insertdate}{}{%
+      {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}}
+  \end{minipage}
+  \vspace{.40cm}
+  \ifx\insertloomtagline\@empty\else
+    \centering{\usebeamerfont{footline}\color{loomSelvage}\insertloomtagline\par}
+    \vspace{.20cm}
+  \fi
+  \centering
+  {\color{loomIndigo}\rule{1.2cm}{1.1pt}}%
+  {\color{loomMadder}\rule{.72cm}{1.1pt}}%
+  {\color{loomWeld}\rule{.45cm}{1.1pt}}%
+  \vspace{.26cm}
+}
+
+% The left-aligned cover matches the content-slide reading direction.
+\defbeamertemplate{title page}{loom left}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north east,inner sep=0pt]
+      at ([xshift=-.50cm,yshift=-.38cm]current page.north east)
+      {\loomtitlegraphic};
+  \end{tikzpicture}\par
+  \raggedright
+  \vspace*{1.00cm}
+  {\usebeamerfont{title}\color{loomIndigo}\inserttitle\par}
+  \ifx\insertsubtitle\@empty\else
+    \vspace{.26cm}
+    {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+  \fi
+  \vspace{.38cm}
+  {\color{loomMadder}\rule{2.8cm}{1.05pt}\par}
+  \vfill
+  \ifdefempty{\insertauthor}{}{%
+    {\usebeamerfont{author}\color{loomIndigo}\insertauthor\par}
+    \vspace{.16cm}}
+  \ifdefempty{\insertinstitute}{}{%
+    {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+    \vspace{.10cm}}
+  \ifdefempty{\insertdate}{}{%
+    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}}
+  \ifx\insertloomtagline\@empty\else
+    \vspace{.20cm}
+    {\usebeamerfont{footline}\color{loomSelvage}\insertloomtagline\par}
+  \fi
+  \vspace*{.50cm}
+}
+\setbeamertemplate{title page}[loom left]
+
+\newcommand{\loomsectionnote}{}
+\newcommand{\setloomsectionnote}[1]{\renewcommand{\loomsectionnote}{#1}}
+
+\defbeamertemplate{section page}{loom minimal}{%
+  \centering
+  {\usebeamerfont{section number projected}\sffamily\bfseries
+   \color{loomWeld!82!black}SECTION \loomtwodigits{\insertsectionnumber}\par}
+  \vspace{.28cm}
+  {\usebeamerfont{section title}\usebeamercolor[fg]{section title}%
+   \insertsection\par}
+  \vspace{.34cm}
+  {\color{loomMadder}\rule{2.8cm}{.9pt}\par}
+}
+
+\defbeamertemplate{section page}{loom woven}{%
+  \vfill
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.23\textwidth}
+      \centering
+      {\fontsize{42}{44}\selectfont\bfseries
+       \color{loomThread!78!loomPaper}\loomtwodigits{\insertsectionnumber}\par}
+    \end{column}
+    \begin{column}{.68\textwidth}
+      {\color{loomSelvage}\usebeamerfont{section number projected}%
+        \raisebox{.1ex}{\LoomTile[loomMadder]}\hspace{.55em}SECTION
+        \loomtwodigits{\insertsectionnumber}\par}
+      \vspace{.15cm}
+      {\usebeamerfont{section title}\usebeamercolor[fg]{section title}%
+        \insertsection\par}
+      \vspace{.28cm}
+      {\color{loomMadder}\rule{4.1cm}{1pt}}
+    \end{column}
+  \end{columns}
+  \vfill
+}
+
+\ifloom@wovensectionpages
+  \setbeamertemplate{section page}[loom woven]
+\else
+  \setbeamertemplate{section page}[loom minimal]
+\fi
+
+\ifloom@sectionpages
+  \ifloom@wovensectionpages
+    \AtBeginSection[]{%
+      \begin{frame}[plain,noframenumbering]
+        \sectionpage
+        \note{\loomsectionnote}
+      \end{frame}%
+    }
+  \else
+    \AtBeginSection[]{%
+      \begin{frame}[c]
+        \sectionpage
+        \note{\loomsectionnote}
+      \end{frame}%
+    }
+  \fi
+\fi
+
+% ---------------------------------------------------------------------------
+% Contents and lists
+% ---------------------------------------------------------------------------
+\setbeamertemplate{section in toc}{%
+  \leavevmode
+  \makebox[2.25em][r]{\color{loomThread}\bfseries
+    \loomtwodigits{\inserttocsectionnumber}}%
+  \hspace{.85em}%
+  {\usebeamerfont{section in toc}\color{loomIndigo}\inserttocsection}\par
+  \vspace{.15cm}%
+}
+\setbeamertemplate{section in toc shaded}{%
+  \leavevmode
+  \makebox[2.25em][r]{\color{loomThread!55!loomPaper}\bfseries
+    \loomtwodigits{\inserttocsectionnumber}}%
+  \hspace{.85em}%
+  {\usebeamerfont{section in toc}\color{loomSelvage!55!loomPaper}%
+    \inserttocsection}\par
+  \vspace{.15cm}%
+}
+\setbeamertemplate{subsection in toc}{%
+  \leavevmode\leftskip=3.2em
+  {\color{loomMadder}\scriptsize\raisebox{.25ex}{\rule{.7em}{.45pt}}}%
+  \hspace{.4em}{\color{loomSelvage}\inserttocsubsection}\par
+}
+
+\setbeamertemplate{itemize item}{\raisebox{.12ex}{\LoomTile[loomIndigo]}}
+\setbeamertemplate{itemize subitem}{\color{loomMadder}\rule{.65em}{.45pt}}
+\setbeamertemplate{itemize subsubitem}{\color{loomWeld}$\vcenter{\hbox{\tiny$\blacktriangleright$}}$}
+\setbeamertemplate{enumerate item}{\color{loomMadder}\bfseries\insertenumlabel.}
+\setbeamertemplate{enumerate subitem}{\color{loomWeld!75!loomInk}\insertenumlabel.}
+\setbeamercolor{caption name}{fg=loomMadder}
+\setbeamercolor{caption}{fg=loomSelvage}
+\setbeamertemplate{caption}[numbered]
+
+% ---------------------------------------------------------------------------
+% Loom knot blocks. These restyle native block, alertblock, exampleblock, and
+% therefore Beamer theorem-like environments as well.
+% ---------------------------------------------------------------------------
+\tcbset{
+  loom knot common/.style={
+    enhanced,
+    sharp corners,
+    boxrule=0pt,
+    left=1.05em,right=.95em,top=.30em,bottom=.45em,
+    before skip=.38em,after skip=.56em,
+    before upper=\RaggedRight,
+    fonttitle=\sffamily\bfseries,
+    titlerule=0pt,
+    toptitle=.45em,bottomtitle=.02em,
+  },
+  loom knot indigo/.style={
+    loom knot common,
+    colback=loomLinen!62!loomPaper,
+    colbacktitle=loomLinen!62!loomPaper,
+    coltitle=loomIndigo,
+    borderline west={2.1pt}{0pt}{loomIndigo},
+    overlay unbroken={\node[anchor=center,inner sep=0pt]
+      at ([xshift=1.05pt,yshift=-1.05em]frame.north west){\LoomTile[loomIndigo]};},
+  },
+  loom knot madder/.style={
+    loom knot common,
+    colback=loomMadder!7!loomLinen,
+    colbacktitle=loomMadder!7!loomLinen,
+    coltitle=loomMadder,
+    borderline west={2.1pt}{0pt}{loomMadder},
+    overlay unbroken={\node[anchor=center,inner sep=0pt]
+      at ([xshift=1.05pt,yshift=-1.05em]frame.north west){\LoomTile[loomMadder]};},
+  },
+  loom knot weld/.style={
+    loom knot common,
+    colback=loomWeld!11!loomLinen,
+    colbacktitle=loomWeld!11!loomLinen,
+    coltitle=loomWeld!72!loomInk,
+    borderline west={2.1pt}{0pt}{loomWeld},
+    overlay unbroken={\node[anchor=center,inner sep=0pt]
+      at ([xshift=1.05pt,yshift=-1.05em]frame.north west){\LoomTile[loomWeld]};},
+  },
+}
+
+\setbeamertemplate{block begin}{%
+  \begin{tcolorbox}[loom knot indigo,title={\insertblocktitle}]%
+  \usebeamerfont{block body}%
+}
+\setbeamertemplate{block end}{\end{tcolorbox}}
+\setbeamertemplate{block alerted begin}{%
+  \begin{tcolorbox}[loom knot madder,title={\insertblocktitle}]%
+  \usebeamerfont{block body alerted}%
+}
+\setbeamertemplate{block alerted end}{\end{tcolorbox}}
+\setbeamertemplate{block example begin}{%
+  \begin{tcolorbox}[loom knot weld,title={\insertblocktitle}]%
+  \usebeamerfont{block body example}%
+}
+\setbeamertemplate{block example end}{\end{tcolorbox}}
+
+% ---------------------------------------------------------------------------
+% Staged reveals. These are thin wrappers around Beamer overlays: each block
+% can enter on a successive click while retaining its final-page position.
+% Use <+-> for automatic sequencing or an explicit specification such as
+% <2->. The generic \loomreveal command works for non-block content.
+% ---------------------------------------------------------------------------
+\tcbset{
+  loom staged common/.style={
+    enhanced,sharp corners,boxrule=0pt,
+    left=.78em,right=.72em,top=.12em,bottom=.20em,
+    before skip=.16em,after skip=.22em,
+    before upper=\RaggedRight,
+    fonttitle=\sffamily\bfseries,
+    titlerule=0pt,toptitle=.22em,bottomtitle=.01em,
+  },
+  loom staged indigo/.style={
+    loom staged common,
+    colback=loomLinen!62!loomPaper,
+    colbacktitle=loomLinen!62!loomPaper,
+    coltitle=loomIndigo,
+    borderline west={1.7pt}{0pt}{loomIndigo},
+    overlay unbroken={\node[anchor=center,inner sep=0pt]
+      at ([xshift=.85pt,yshift=-.78em]frame.north west)
+      {\LoomTile[loomIndigo]};},
+  },
+  loom staged madder/.style={
+    loom staged common,
+    colback=loomMadder!7!loomLinen,
+    colbacktitle=loomMadder!7!loomLinen,
+    coltitle=loomMadder,
+    borderline west={1.7pt}{0pt}{loomMadder},
+    overlay unbroken={\node[anchor=center,inner sep=0pt]
+      at ([xshift=.85pt,yshift=-.78em]frame.north west)
+      {\LoomTile[loomMadder]};},
+  },
+  loom staged weld/.style={
+    loom staged common,
+    colback=loomWeld!11!loomLinen,
+    colbacktitle=loomWeld!11!loomLinen,
+    coltitle=loomWeld!72!loomInk,
+    borderline west={1.7pt}{0pt}{loomWeld},
+    overlay unbroken={\node[anchor=center,inner sep=0pt]
+      at ([xshift=.85pt,yshift=-.78em]frame.north west)
+      {\LoomTile[loomWeld]};},
+  },
+}
+\newenvironment<>{loomstepblock}[1]{%
+  \begin{uncoverenv}#2%
+  \begin{tcolorbox}[loom staged indigo,title={#1}]%
+}{%
+  \end{tcolorbox}%
+  \end{uncoverenv}%
+}
+\newenvironment<>{loomstepalert}[1]{%
+  \begin{uncoverenv}#2%
+  \begin{tcolorbox}[loom staged madder,title={#1}]%
+}{%
+  \end{tcolorbox}%
+  \end{uncoverenv}%
+}
+\newenvironment<>{loomstepexample}[1]{%
+  \begin{uncoverenv}#2%
+  \begin{tcolorbox}[loom staged weld,title={#1}]%
+}{%
+  \end{tcolorbox}%
+  \end{uncoverenv}%
+}
+\newcommand<>{\loomreveal}[1]{\uncover#2{#1}}
+\newenvironment<>{loomrevealenv}{%
+  \begin{uncoverenv}#1%
+}{%
+  \end{uncoverenv}%
+}
+\newenvironment<>{loomonlyenv}{%
+  \begin{onlyenv}#1%
+}{%
+  \end{onlyenv}%
+}
+
+\setbeamertemplate{theorems}[numbered]
+\setbeamercolor{block body}{fg=loomInk,bg=loomLinen!62!loomPaper}
+\setbeamercolor{block body alerted}{fg=loomInk,bg=loomMadder!7!loomLinen}
+\setbeamercolor{block body example}{fg=loomInk,bg=loomWeld!11!loomLinen}
+
+% Additional Loom voices for slides.
+\newtcolorbox{loomstrand}[1][Intuition]{
+  enhanced,sharp corners,boxrule=0pt,
+  colback=loomIndigo!4!loomPaper,
+  borderline west={1.6pt}{0pt}{loomIndigo!58!loomPaper},
+  left=.95em,right=.85em,top=.38em,bottom=.45em,
+  before skip=.38em,after skip=.56em,
+  before upper=\RaggedRight,
+  title={#1},coltitle=loomIndigo,
+  fonttitle=\sffamily\bfseries,
+  colbacktitle=loomIndigo!4!loomPaper,
+  titlerule=0pt,toptitle=.42em,bottomtitle=.02em,
+}
+
+\newtcolorbox{loomtakeaway}[1][Takeaway]{
+  enhanced,sharp corners,boxrule=0pt,
+  colback=loomIndigo,coltext=white,
+  left=1em,right=1em,top=.38em,bottom=.45em,
+  before skip=.4em,after skip=.25em,
+  before upper=\RaggedRight,
+  title={#1},coltitle=loomWeld!35!white,
+  fonttitle=\sffamily\bfseries,
+  colbacktitle=loomIndigo,
+  titlerule=0pt,toptitle=.42em,bottomtitle=.02em,
+}
+
+\newcommand{\loomsource}[1]{%
+  \par\vfill
+  \begingroup
+    \usebeamerfont{loom source}%
+    \usebeamercolor[fg]{loom source}%
+    \RaggedRight #1\par
+  \endgroup
+}
+\newcommand{\loomkeyterm}[1]{\textcolor{loomIndigo}{\bfseries #1}}
+\newcommand{\loomriskterm}[1]{\textcolor{loomMadder}{\bfseries #1}}
+\newcommand{\loomtheoremtag}[1]{\textcolor{loomMadder}{\bfseries #1}}
+\newcommand{\loomkeyword}[1]{{\bfseries\color{loomMadder}#1}}
+\newcommand{\loomwhisper}[1]{{\small\color{loomIndigo!78!loomInk}#1}}
+\newcommand{\loomwarmth}[1]{%
+  \begin{tikzpicture}[x=1pt,y=1pt,baseline=-.4pt]
+    \foreach \loom@i in {1,...,5}{%
+      \ifnum\loom@i>#1
+        \draw[loomThread,line width=.45pt] ({(\loom@i-1)*5},0) rectangle +(3.4,3.4);
+      \else
+        \fill[loomWeld] ({(\loom@i-1)*5},0) rectangle +(3.4,3.4);
+      \fi
+    }%
+  \end{tikzpicture}%
+}
+
+% Bibliography and links
+\setbeamertemplate{bibliography item}{\LoomTile[loomMadder]}
+\setbeamercolor{bibliography item}{fg=loomMadder}
+\setbeamercolor{bibliography entry author}{fg=loomInk}
+\setbeamercolor{bibliography entry title}{fg=loomIndigo}
+\setbeamercolor{bibliography entry location}{fg=loomSelvage}
+\setbeamercolor{bibliography entry note}{fg=loomSelvage}
+\hypersetup{colorlinks=true,linkcolor=loomIndigo,citecolor=loomMadder,urlcolor=loomIndigo}
+
+\mode<all>
+
+\endinput

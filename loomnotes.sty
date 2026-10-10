@@ -1,0 +1,44 @@
+%% Right-side presenter notes for Loom. MIT license, see LICENSE.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{loomnotes}[2026/10/10 v1.0 Unscaled right-side Beamer notes]
+\RequirePackage{pgfpages}
+\RequirePackage{etoolbox}
+\@ifclassloaded{beamer}{}{\PackageError{loomnotes}{The beamer class is required}{Load this package only in a Beamer presentation.}}
+
+% Load AFTER the theme, only in the notes build. This is deliberately scoped
+% to two unscaled horizontal pages. Do not select a different pgfpages layout
+% after loading it: the shipout below does not implement arbitrary layouts.
+\setbeameroption{show notes on second screen=right}
+% The full slide is already visible beside its notes. Keep Beamer's context
+% header, but omit its redundant thumbnail: a copied, scaled slide box can
+% duplicate hyperlink annotations without scaling their clickable regions.
+% Retaining the thumbnail's vertical extent preserves the header geometry.
+\renewcommand{\insertslideintonotes}[1]{\vbox to #1\paperheight{\vfil}}
+\def\pgfpages@buildshipoutbox{%
+  \setbox\pgfpages@shipoutbox=\vbox{%
+    \set@typeset@protect\offinterlineskip
+    \hbox to \pgfphysicalwidth{%
+      \pgf@cpn=1\relax
+      \loop
+        \hbox to \paperwidth{%
+          \hskip1in
+          \vbox to \paperheight{%
+            \vskip1in\offinterlineskip
+            \expandafter\copy\csname pgfpages@box@\the\pgf@cpn\endcsname
+            \vss
+          }\hss
+        }%
+      \ifnum\pgf@cpn<2\relax
+        \advance\pgf@cpn by1\relax
+      \repeat
+    }%
+  }%
+}
+
+% Beamer's note page can leave the ambient foreground white. Restore the
+% slide's foreground after note processing, before title parsing. This covers
+% inline titles, inline subtitles, separate \frametitle calls, and no title.
+\pretocmd{\beamer@checkframetitle}
+  {\usebeamercolor[fg]{normal text}}
+  {}{\PackageWarning{loomnotes}{Frame-start patch failed; check notes-slide text colors}}
+\endinput

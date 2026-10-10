@@ -1,0 +1,38 @@
+% !TeX program = latexmk
+% Build from this directory: latexmk starter.tex
+\documentclass[aspectratio=169,11pt,t,compress]{beamer}
+\usetheme{Loom}
+\title[Short title]{Your presentation title}
+\subtitle{Your subtitle}
+\author{Your Name}
+\institute{Your Organization}
+\date{\today}
+% Optional: \setloomlogofile{assets/your-logo.pdf}
+% Optional: \usepackage{loomnotes} % notes on the right
+
+\begin{document}
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+  \note{Introduce yourself and the topic.}
+\end{frame}
+
+\begin{frame}{Contents}
+  \tableofcontents[hideallsubsections]
+  \note{Give the audience a short overview.}
+\end{frame}
+
+\setloomsectionnote{Introduce the main question.}
+\section[Introduction]{Introduction}
+
+% BEGINFRAME
+\begin{frame}{A clear title}
+  State the main point.
+  \begin{itemize}
+    \item Give one supporting detail.
+    \item Give another if needed.
+  \end{itemize}
+  \note{Explain the point, then connect it to the next slide.}
+\end{frame}
+% ENDFRAME
+
+\end{document}

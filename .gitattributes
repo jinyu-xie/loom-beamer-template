@@ -1,0 +1,26 @@
+* text=auto eol=lf
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+
+# Local-only institutional asset and generated build files.
+/osu-logo.pdf export-ignore
+/*.pdf export-ignore
+/build*/ export-ignore
+*.aux export-ignore
+*.bbl export-ignore
+*.blg export-ignore
+*.dvi export-ignore
+*.fdb_latexmk export-ignore
+*.fls export-ignore
+*.log export-ignore
+*.nav export-ignore
+*.out export-ignore
+*.snm export-ignore
+*.synctex.gz export-ignore
+*.toc export-ignore
+*.vrb export-ignore
+*.xdv export-ignore
+*.run.xml export-ignore
+*.bcf export-ignore
